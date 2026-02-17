@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: postgis
+    environment:
+      POSTGRES_USER: geo
+      POSTGRES_PASSWORD: geo_pass
+      POSTGRES_DB: geo_dw
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geo -d geo_dw"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  prefect-server:
+    image: prefecthq/prefect:3.6-python3.11
+    container_name: prefect-server
+    command: prefect server start
+    environment:
+      - PREFECT_SERVER_API_HOST=0.0.0.0
+    ports:
+      - "4200:4200"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgis_data:
