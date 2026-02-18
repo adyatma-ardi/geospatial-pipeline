@@ -3,15 +3,15 @@ services:
     image: postgis/postgis:15-3.3
     container_name: postgis
     environment:
-      POSTGRES_USER: geo
-      POSTGRES_PASSWORD: geo_pass
-      POSTGRES_DB: geo_dw
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5433:5432"
     volumes:
       - postgis_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U geo -d geo_dw"]
+      test: ["CMD-SHELL", "pg_isready -U $$DB_USER -d $$DB_NAME"]
       interval: 5s
       timeout: 5s
       retries: 5
