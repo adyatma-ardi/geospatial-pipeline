@@ -9,9 +9,10 @@ services:
     ports:
       - "5433:5432"
     volumes:
+      # [DOCKER VOLUME] - DATABASE
       - postgis_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRESS_DB"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -24,11 +25,15 @@ services:
     command: prefect server start
     environment:
       - PREFECT_SERVER_API_HOST=0.0.0.0
+      - PREFECT_API_DATABASE_CONNECTION=postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
     ports:
       - "4200:4200"
     volumes:
-      - "./services:/opt/prefect/services"
-      - "./data:/opt/prefect/data"
+      # [BIND MOUNT] - SCRIPT
+      - "../services:/opt/prefect/services"
+      # [BIND MOUNT] - DATA
+      - "../data:/opt/prefect/data"
+      # [DOCKER VOLUME] - METADATA PREFECT
       - prefect_internal:/root/.prefect
     depends_on:
       postgres:
@@ -36,4 +41,4 @@ services:
 
 volumes:
   postgis_data:
-  prefect_internal
+  prefect_internal:
